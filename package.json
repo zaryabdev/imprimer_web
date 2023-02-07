@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "antd": "^5.1.7",
     "namor": "^2.0.4",
     "pouchdb": "^8.0.0",
     "pouchdb-browser": "^8.0.0",
