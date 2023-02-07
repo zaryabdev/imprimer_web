@@ -1,177 +1,208 @@
-import React from "react";
-import { Config, names, uniqueNamesGenerator } from "unique-names-generator";
+import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const PouchDB = window.PouchDB;
 const db = new PouchDB("pouchdb_web");
 const log = (data) => console.log(data);
 
-const customConfig: Config = {
-    dictionaries: [names],
-    separator: " ",
-    length: 2,
+const initialState = {
+    id: "",
+    key: "",
+    doc: {
+        _id: "",
+        _rev: "",
+        username: "",
+        password: "",
+    },
+    value: {
+        rev: "",
+    },
 };
+
 const User: React.FC = () => {
-    async function createdDoc() {
-        const id = uuidv4();
-        const name = uniqueNamesGenerator(customConfig);
-        log(id);
-        log(name);
-        try {
-            var response = await db.put({
-                _id: id,
-                name: name,
+    const [userList, setUserList] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(initialState);
+    useEffect(() => {
+        getAllDocs()
+            .then((data) => {
+                setUserList(data.rows);
+            })
+            .catch((err) => {
+                log(err);
             });
+    }, []);
+
+    // useEffect(() => {
+    //     log("selectedUser");
+    //     log(selectedUser);
+    // }, [selectedUser]);
+
+    function handleInput(event) {
+        let name = event.target.name;
+        let value = event.target.value;
+
+        let temp = { ...selectedUser };
+        temp.doc = { ...selectedUser.doc };
+        temp.doc[name] = value;
+
+        setSelectedUser(temp);
+    }
+
+    async function createDoc() {
+        const id = uuidv4();
+
+        let userDoc = { ...selectedUser.doc };
+        userDoc._id = id;
+
+        try {
+            var response = await db.put(userDoc);
             log(response);
+
+            if (response.ok) {
+                getAllDocs()
+                    .then((data) => {
+                        setUserList(data.rows);
+                    })
+                    .catch((err) => {
+                        log(err);
+                    });
+            }
         } catch (err) {
             log(err);
         }
     }
 
     async function updateDoc() {
-        const name = uniqueNamesGenerator(customConfig);
-        log(name);
-        try {
-            var doc = await db.get("bebd236f-3a1c-4832-9197-cdef91ee142d");
-            log(doc);
+        let userDoc = { ...selectedUser.doc };
 
-            var response = await db.put({
-                _id: doc._id,
-                _rev: doc._rev,
-                name: name,
-            });
+        try {
+            var response = await db.put(userDoc);
 
             log(response);
-        } catch (err) {
-            console.log(err);
-        }
-    }
 
-    // updateDoc();
-
-    async function createdDocByPost() {
-        const name = namor.generate({ words: 2, saltLength: 0 });
-        log(name);
-        try {
-            var response = await db.post({
-                name: name,
-            });
-
-            log(response);
+            if (response.ok) {
+                getAllDocs()
+                    .then((data) => {
+                        setUserList(data.rows);
+                    })
+                    .catch((err) => {
+                        log(err);
+                    });
+            }
         } catch (err) {
             log(err);
         }
     }
 
-    // createdDocByPost();
-
-    async function getDoc() {
+    async function removeDoc() {
+        let userDoc = { ...selectedUser.doc };
         try {
-            var response = await db.get("74b64661-ec10-40e5-8390-0922f58e4428");
-
+            var response = await db.remove(userDoc);
             log(response);
-        } catch (err) {
-            log(err);
-        }
-    }
-    // getDoc();
-
-    async function deleteDoc() {
-        try {
-            var doc = await db.get("74b64661-ec10-40e5-8390-0922f58e4428");
-            var response = await db.remove(doc);
-            log(response);
-        } catch (err) {
-            log(err);
-        }
-    }
-
-    // deleteDoc();
-
-    // Note that bulkDocs() is not transactional, and that you may get back a mixed array of errors/non-errors. In CouchDB/PouchDB, the smallest atomic unit is the document.
-    async function createdBulkDocs() {
-        try {
-            var response = await db.bulkDocs([
-                {
-                    _id: uuidv4(),
-                    name: uniqueNamesGenerator(customConfig),
-                },
-                {
-                    _id: uuidv4(),
-                    name: uniqueNamesGenerator(customConfig),
-                },
-            ]);
-
-            log(response);
+            if (response.ok) {
+                getAllDocs()
+                    .then((data) => {
+                        setUserList(data.rows);
+                    })
+                    .catch((err) => {
+                        log(err);
+                    });
+            }
         } catch (err) {
             log(err);
         }
     }
 
-    // createdBulkDocs();
-
-    async function updateBulkDocs() {
-        try {
-            var response = await db.bulkDocs([
-                {
-                    _id: "38cf05f8-53e0-4c76-93d4-18e4d3610212",
-                    _rev: "1-02592342966b73a3e8a17a420e8b8dfd",
-                    name: uniqueNamesGenerator(customConfig),
-                },
-                {
-                    _id: "9fd2c254-03b4-42bf-bc1d-bb74e67bbb26",
-                    _rev: "1-16e999b3a9e55c70a49b61944511978a",
-                    name: uniqueNamesGenerator(customConfig),
-                },
-            ]);
-
-            log(response);
-        } catch (err) {
-            log(err);
-        }
-    }
-
-    // updateBulkDocs();
-
-    async function bulkDeleteDocs() {
-        try {
-            var response = await db.bulkDocs([
-                {
-                    _id: "38cf05f8-53e0-4c76-93d4-18e4d3610212",
-                    _rev: "1-02592342966b73a3e8a17a420e8b8dfd",
-                    _deleted: true,
-                },
-                {
-                    _id: "9fd2c254-03b4-42bf-bc1d-bb74e67bbb26",
-                    _rev: "1-16e999b3a9e55c70a49b61944511978a",
-                    _deleted: true,
-                },
-            ]);
-
-            log(response);
-        } catch (err) {
-            log(err);
-        }
-    }
-
-    // bulkDeleteDocs();
-
-    async function bulkFetchDocs() {
+    async function getAllDocs() {
         try {
             var result = await db.allDocs({
                 include_docs: true,
                 attachments: true,
-                // startkey: "38cf05f8-53e0-4c76-93d4-18e4d3610212",
-                // endkey: "9fd2c254-03b4-42bf-bc1d-bb74e67bbb26",
             });
 
-            log(result);
+            return result;
         } catch (err) {
             log(err);
+            return [];
         }
     }
 
-    return <div>User</div>;
+    return (
+        <div className="row">
+            <div className="col">
+                <table className="table p-2">
+                    <thead>
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Password</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {userList.map((user) => {
+                            return (
+                                <tr
+                                    onClick={() => setSelectedUser(user)}
+                                    key={user.id}
+                                >
+                                    <th scope="row">{user.doc.username}</th>
+                                    <td>{user.doc.password}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+            <div className="col">
+                <div className="p-2">
+                    <div className="mb-3">
+                        <label className="form-label">Username</label>
+                        <input
+                            type="text"
+                            name="username"
+                            className="form-control"
+                            value={selectedUser.doc.username}
+                            onChange={handleInput}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            className="form-control"
+                            value={selectedUser.doc.password}
+                            onChange={handleInput}
+                        />
+                    </div>
+
+                    <button
+                        className="btn btn-primary me-2"
+                        onClick={() => setSelectedUser(initialState)}
+                    >
+                        Add New
+                    </button>
+                    <button
+                        className="btn btn-primary me-2"
+                        onClick={createDoc}
+                    >
+                        Create Doc
+                    </button>
+                    <button
+                        className="btn btn-primary me-2"
+                        onClick={updateDoc}
+                    >
+                        Update Doc
+                    </button>
+                    <button
+                        className="btn btn-primary me-2"
+                        onClick={removeDoc}
+                    >
+                        Remove Doc
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default User;
