@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const PouchDB = window.PouchDB;
+// const dbsplugin = window.pouch__all_dbs__;
+
+// PouchDB.plugin(dbsplugin);
 const db = new PouchDB("pouchdb_web");
+const db2 = new PouchDB("pouchdb_web_2");
 const log = (data) => console.log(data);
 
 const initialState = {
@@ -30,6 +34,10 @@ const User: React.FC = () => {
             .catch((err) => {
                 log(err);
             });
+
+        // PouchDB.allDbs()
+        //     .then((dbs) => log(dbs))
+        //     .catch((err) => log(err));
     }, []);
 
     // useEffect(() => {
