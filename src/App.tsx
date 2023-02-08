@@ -1,4 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-datasheet-grid/dist/style.css";
 import { Link, MemoryRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Grid from "./pages/Grid";

@@ -15,8 +15,6 @@ import {
     textColumn,
 } from "react-datasheet-grid";
 
-import "react-datasheet-grid/dist/style.css";
-
 const PACKINTYPES = [];
 const PRODUCTNAMES = [];
 
